@@ -1,68 +1,65 @@
-import React, { Component } from 'react';
-import PropTypes from 'prop-types';
+import { useState } from 'react';
 import Statistics from 'components/Statistics';
 import FeedbackOptions from 'components/FeedbackOptions';
 import Section from 'components/Section';
 import { FormWrap } from './FeedbackForm.styled';
 
-export default class FeedbackForm extends Component {
-  state = {
-    good: this.props.state.good,
-    neutral: this.props.state.neutral,
-    bad: this.props.state.bad,
-  };
+export const FeedbackForm = () => {
+  const [good, setGood] = useState(0);
+  const [neutral, setNeutral] = useState(0);
+  const [bad, setBad] = useState(0);
+  const [totalFeedback, setTotalFeedback] = useState(0);
 
-  handleFeedbackBtn = e => {
+  const options = ['good', 'neutral', 'bad'];
+
+  const handleFeedbackBtn = e => {
     const keyName = e.target.name;
 
-    this.setState(prevState => {
-      return { [keyName]: prevState[keyName] + 1 };
-    });
+    switch (keyName) {
+      case 'good':
+        setGood(state => state + 1);
+        setTotalFeedback(state => state + 1);
+        break;
+      case 'neutral':
+        setNeutral(state => state + 1);
+        setTotalFeedback(state => state + 1);
+        break;
+      case 'bad':
+        setBad(state => state + 1);
+        setTotalFeedback(state => state + 1);
+        break;
+
+      default:
+        return;
+    }
   };
 
-  countTotalFeedback = () => {
-    const values = Object.values(this.state);
-
-    const total = values.reduce((total, value) => {
-      return total + value;
-    }, 0);
-
-    return total;
-  };
-
-  countPositiveFeedbackPercentage = () => {
-    const total = this.countTotalFeedback();
-    const percentage = Math.round((this.state['good'] / total) * 100);
+  const countPositiveFeedbackPercentage = () => {
+    const percentage = Math.round((good / totalFeedback) * 100);
 
     return percentage ? percentage : 0;
   };
 
-  render() {
-    const { good, neutral, bad } = this.state;
+  return (
+    <FormWrap>
+      <Section title="Please leave feedback">
+        <FeedbackOptions
+          options={options}
+          onLeaveFeedback={handleFeedbackBtn}
+        />
+      </Section>
 
-    return (
-      <FormWrap>
-        <Section title="Please leave feedback">
-          <FeedbackOptions
-            options={Object.keys(this.state)}
-            onLeaveFeedback={this.handleFeedbackBtn}
-          />
-        </Section>
-
-        <Section title="Statistics">
-          <Statistics
-            good={good}
-            neutral={neutral}
-            bad={bad}
-            total={this.countTotalFeedback()}
-            positivePercentage={this.countPositiveFeedbackPercentage()}
-          />
-        </Section>
-      </FormWrap>
-    );
-  }
-}
-
-FeedbackForm.propTypes = {
-  state: PropTypes.object,
+      <Section title="Statistics">
+        <Statistics
+          good={good}
+          neutral={neutral}
+          bad={bad}
+          total={totalFeedback}
+          positivePercentage={countPositiveFeedbackPercentage()}
+        />
+      </Section>
+    </FormWrap>
+  );
 };
+
+export default FeedbackForm;
